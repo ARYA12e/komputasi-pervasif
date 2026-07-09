@@ -78,3 +78,4 @@ Untuk mengaktifkan fitur penyimpanan data otomatis ke Google Sheets:
 Dibuat untuk keperluan simulasi ujian navigasi komunitas. 
 Aman, responsif, dan interaktif!
 ========================================================================
+video demo : https://drive.google.com/file/d/1uLW1qMAWiirfe7X_V1hCtNVg4cOB5qmj/view?usp=drive_link
