@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NatureQuest - Mountain Explorer Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- LATAR BELAKANG PARALLAX (SUNGAL PANJANG PERSPEKTIF) -->
+    <div class="parallax-bg">
+        <div class="sky-glow"></div>
+        <div class="sun"></div>
+        
+        <!-- Awan Bergerak -->
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="cloud c3"></div>
+        
+        <!-- Barisan Gunung Modern -->
+        <div class="mountain m-back"></div>
+        <div class="mountain m-mid"></div>
+        <div class="mountain m-front"></div>
+        
+        <!-- FIX: Sungai Panjang Mengalir dari Gunung ke Bawah Layar -->
+        <div class="river-perspective">
+            <div class="river-flow"></div>
+        </div>
+
+        <!-- Lantai Hutan & Pohon Bergoyang -->
+        <div class="forest-floor">
+            <div class="tree t1"><div class="leaves"></div><div class="trunk"></div></div>
+            <div class="tree t2"><div class="leaves"></div><div class="trunk"></div></div>
+            <div class="tree t3"><div class="leaves"></div><div class="trunk"></div></div>
+            <div class="tree t4"><div class="leaves"></div><div class="trunk"></div></div>
+        </div>
+    </div>
+
+    <!-- Maskot Rusa Interaktif (Rupi) -->
+    <div class="mascot-container" id="mascot-box">
+        <div class="deer">
+            <div class="antlers">
+                <div class="antler-l"></div>
+                <div class="antler-r"></div>
+            </div>
+            <div class="ears">
+                <div class="ear-l"></div>
+                <div class="ear-r"></div>
+            </div>
+            <div class="deer-head">
+                <div class="eyes">
+                    <div class="eye"><div class="pupil"></div></div>
+                    <div class="eye"><div class="pupil"></div></div>
+                </div>
+                <div class="muzzle">
+                    <div class="nose"></div>
+                </div>
+            </div>
+            <div class="deer-body"></div>
+        </div>
+        <div class="speech-bubble" id="bubble-text">Selamat datang di Basecamp! Masukkan NIM untuk mendaki.</div>
+    </div>
+
+    <!-- Container Utama (Glassmorphism) -->
+    <div class="app-container" id="main-frame">
+        
+        <!-- HALAMAN 1: LOGIN -->
+        <div id="screen-login" class="screen active">
+            <h1 class="brand-title">NATUREQUEST</h1>
+            <p class="brand-subtitle">Ujian Mandiri Berbasis Komunitas Pendaki</p>
+            
+            <div class="input-field">
+                <label for="nim-input">Nomor Induk Mahasiswa (NIM)</label>
+                <input type="text" id="nim-input" placeholder="Contoh: 22010123">
+            </div>
+            
+            <div class="input-field">
+                <label for="pass-input">Sandi Akses Pos</label>
+                <input type="password" id="pass-input" placeholder="Masukkan password...">
+            </div>
+            
+            <button class="btn btn-primary" id="btn-login" onclick="executeLogin()">Otorisasi & Mulai Mendaki</button>
+        </div>
+
+        <!-- HALAMAN 2: KUIS / PENDAKIAN -->
+        <div id="screen-quiz" class="screen">
+            <div class="quiz-status-bar">
+                <div class="map-path">
+                    <div class="checkpoint active" id="node-0">Base</div>
+                    <div class="checkpoint" id="node-1">Pos 1</div>
+                    <div class="checkpoint" id="node-2">Pos 2</div>
+                    <div class="checkpoint" id="node-3">Pos 3</div>
+                    <div class="checkpoint" id="node-4">Puncak</div>
+                </div>
+                <div class="stamina-panel">
+                    <span class="stamina-label">Stamina:</span>
+                    <div class="stamina-progress">
+                        <div class="stamina-fill" id="stamina-meter" style="width: 100%;"></div>
+                    </div>
+                    <span class="stamina-digit" id="stamina-text">100%</span>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <h2 id="question-display">Mengambil data rintangan jalur...</h2>
+            </div>
+
+            <div class="options-container" id="choices-grid">
+                <!-- Pilihan Jawaban via JS -->
+            </div>
+
+            <button class="btn btn-secondary" id="btn-next" onclick="submitStep()" disabled>Ambil Langkah Berikutnya</button>
+        </div>
+
+        <!-- HALAMAN 3: EVALUASI AKHIR -->
+        <div id="screen-result" class="screen">
+            <h1 class="end-title">Ekspedisi Selesai</h1>
+            <p class="end-subtitle" id="end-status-text">Anda telah mencapai puncak!</p>
+            
+            <div class="score-card">
+                <span class="score-title">Skor Kelulusan</span>
+                <span class="score-num" id="final-score-display">0</span>
+            </div>
+
+            <div class="audit-trail">
+                <h3>Catatan Perjalanan Navigasi:</h3>
+                <div class="log-stream" id="log-console"></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="window.location.reload()">Kembali ke Basecamp</button>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP BADAI -->
+    <div class="modal-overlay" id="storm-warning">
+        <div class="modal-card">
+            <h2 class="alert-header">🚨 BADAI DETEKSI! 🚨</h2>
+            <p class="alert-body">Sistem mendeteksi Anda meninggalkan jalur navigasi resmi (berpindah tab/aplikasi). Cuaca buruk menerjang dan menguras stamina Anda!</p>
+            <button class="btn btn-danger" onclick="dismissStorm()">Kembali Berfokus</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
