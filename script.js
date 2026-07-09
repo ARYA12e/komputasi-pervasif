@@ -34,59 +34,72 @@ function switchScreen(activeScreenId) {
     document.getElementById(activeScreenId).classList.add('active');
 }
 
+// PERBAIKAN TOTAL: Sistem validasi langsung terhubung ke database Google Sheets
 async function executeLogin() {
     const nimInput = document.getElementById('nim-input').value.trim();
     const passInput = document.getElementById('pass-input').value.trim();
     const loginBtn = document.getElementById('btn-login');
 
-    // 1. VALIDASI INPUT KOSONG
     if (!nimInput || !passInput) {
         updateMascot("Lengkapi identitas navigasi NIM dan Sandi Anda!");
         return;
     }
 
-    // 2. VALIDASI PASSWORD (Contoh: password yang benar adalah "Pendaki2026")
-    // Silakan ganti "Pendaki2026" dengan password rahasia yang kamu inginkan
-    const PASSWORD_BENAR = "Pendaki2026"; 
-
-    if (passInput !== PASSWORD_BENAR) {
-        updateMascot("Sandi Akses Pos salah! Periksa kembali peta logistik Anda.");
-        
-        // Efek getar pada kotak login jika salah
-        const mainFrame = document.getElementById('main-frame');
-        mainFrame.classList.add('shake');
-        setTimeout(() => mainFrame.classList.remove('shake'), 450);
-        return; // Menghentikan fungsi agar tidak bisa masuk ke kuis
-    }
-
-    // JIKA PASSWORD BENAR, PROSES DI BAWAH INI AKAN BERJALAN
-    runtimeState.nim = nimInput;
     loginBtn.innerText = "Memverifikasi Akses Jalur...";
     loginBtn.disabled = true;
 
     try {
-        await fetch(GOOGLE_SHEET_URL, {
+        // Mengirim data menggunakan text/plain untuk mempermudah bypass CORS pada Google Apps Script
+        const response = await fetch(GOOGLE_SHEET_URL, {
             method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({
                 method: "AUTH_LOGIN",
-                nim: runtimeState.nim,
-                timestamp: new Date().toISOString()
+                nim: nimInput,
+                password: passInput // Mengirimkan password ke Cloud Apps Script
             })
         });
-        addLog(`Pendaki ${runtimeState.nim} berhasil melewati gerbang pemeriksaan.`);
-        switchScreen('screen-quiz');
-        initialiseQuiz();
+        
+        const result = await response.json();
+
+        // Membaca respons hasil pemeriksaan dari Google Sheets
+        if (result.status === "SUCCESS") {
+            runtimeState.nim = nimInput; // Menyimpan NIM yang valid ke session kuis
+            addLog(`Pendaki ${runtimeState.nim} berhasil melewati gerbang pemeriksaan.`);
+            switchScreen('screen-quiz');
+            initialiseQuiz();
+        } else {
+            // Jika akun Google Sheets merespons FAILED (Sandi atau NIM tidak terdaftar)
+            updateMascot("Sandi Akses Pos atau NIM salah! Periksa kembali peta logistik Anda.");
+            triggerLoginShake();
+        }
+
     } catch (error) {
-        // Jika internet mati tapi password sudah benar, tetap diizinkan masuk lewat jalur offline
-        addLog("Koneksi cloud gagal. Memulai enkripsi lokal offline.", true);
-        switchScreen('screen-quiz');
-        initialiseQuiz();
+        console.error(error);
+        addLog("Gagal terhubung ke database Cloud.", true);
+        
+        // SISTEM CADANGAN OFFLINE (Bila server google sheets down/tanpa internet)
+        // Kamu bisa gunakan password statis ini sebagai kunci darurat lokal Anda
+        if (passInput === "Pendaki2026") {
+            runtimeState.nim = nimInput;
+            addLog("Kunci darurat pos aktif. Masuk via jalur offline.");
+            switchScreen('screen-quiz');
+            initialiseQuiz();
+        } else {
+            updateMascot("Gagal sinkronisasi data. Periksa koneksi internet Anda!");
+            triggerLoginShake();
+        }
     } finally {
         loginBtn.innerText = "Otorisasi & Mulai Mendaki";
         loginBtn.disabled = false;
     }
+}
+
+// Fungsi pembantu untuk efek getar jika sandi salah
+function triggerLoginShake() {
+    const mainFrame = document.getElementById('main-frame');
+    mainFrame.classList.add('shake');
+    setTimeout(() => mainFrame.classList.remove('shake'), 450);
 }
 
 function initialiseQuiz() {
